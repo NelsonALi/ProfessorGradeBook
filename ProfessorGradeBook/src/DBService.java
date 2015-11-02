@@ -4,8 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Properties;
+
 import javax.servlet.ServletException;
 
 public class DBService {
@@ -93,15 +97,25 @@ public class DBService {
 	}
 	public void addStudent(Student aStudent) {
 		PreparedStatement stmt = null;
-		String sql = "insert into students (email, loginname, password, regdate) values (?,?,?,?);
-		 currentDate = "";
+		String sql = "insert into students (email, loginname, password, regdate) values (?,?,?,?)";
+		 Date currentDate = new Date();
+		 SimpleDateFormat sdf = new SimpleDateFormat("MM-DD-YYYY");
 		try {
 			stmt = this.conn.prepareStatement(sql);
 			stmt.setString(1, aStudent.getEmail());
 			stmt.setString(2, aStudent.getLoginname());
 			stmt.setString(3, aStudent.getPassword());
-			currentDate = "TO_DATE('" + aStudent.getRegdate() + "', 'MM-DD-YYYY')";
-			stmt.setString(4,  currentDate);  // TO_DATE('10/30/2015', 'MM-DD-YYYY' 
+			String formattedDate = sdf.format(currentDate);
+			java.util.Date utilDate = null;
+			try {
+				utilDate = sdf.parse(formattedDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+//			currentDate = "TO_DATE('" + aStudent.getRegdate() + "', 'MM-DD-YYYY')"; // TO_DATE('10/30/2015', 'MM-DD-YYYY' 
+			stmt.setDate(4,  sqlDate);  
 			stmt.executeUpdate();
 			conn.commit();
 		} catch (SQLException e) {
